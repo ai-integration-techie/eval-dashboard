@@ -1,616 +1,1037 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///Users/hirenshah/Downloads/index.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Email Classifier — Eval Dashboard | Hiren Shah</title>
+<title>HHH Eval Framework — AI Email Classifier Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --surface3: #272727;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ece4;
+  --muted: #7a7670;
+  --muted2: #5a5650;
+  --accent: #e8d5a3;
+  --accent2: #c4a96b;
+  --green: #6db87a;
+  --green-bg: rgba(109,184,122,0.12);
+  --amber: #d4944a;
+  --amber-bg: rgba(212,148,74,0.12);
+  --red: #c96060;
+  --red-bg: rgba(201,96,96,0.12);
+  --blue: #6b9fd4;
+  --blue-bg: rgba(107,159,212,0.12);
+  --purple: #9b84d4;
+  --purple-bg: rgba(155,132,212,0.12);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --r: 8px;
+  --r2: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* LAYOUT */
+.page { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
 
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --border: #1e2d45;
-    --accent: #00c2ff;
-    --accent2: #7c3aed;
-    --green: #10b981;
-    --yellow: #f59e0b;
-    --red: #ef4444;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --text3: #475569;
-  }
+/* HEADER */
+.hero {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent2);
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.hero-sub {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tag.green { border-color: rgba(109,184,122,0.3); color: var(--green); background: var(--green-bg); }
+.tag.amber { border-color: rgba(212,148,74,0.3); color: var(--amber); background: var(--amber-bg); }
+.tag.blue  { border-color: rgba(107,159,212,0.3); color: var(--blue); background: var(--blue-bg); }
+.tag.purple{ border-color: rgba(155,132,212,0.3); color: var(--purple); background: var(--purple-bg); }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 0;
-  }
+/* SECTION */
+.section { margin-bottom: 48px; }
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
-  /* HEADER */
-  header {
-    background: linear-gradient(135deg, #0a0e1a 0%, #0d1b2e 60%, #0a1628 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 2rem 2.5rem 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,194,255,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(0,194,255,0.1);
-    border: 1px solid rgba(0,194,255,0.25);
-    color: var(--accent);
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 20px;
-    margin-bottom: 0.75rem;
-  }
-  .header-badge::before { content: '●'; font-size: 8px; }
-  h1 {
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 700; letter-spacing: -0.02em;
-    line-height: 1.2; margin-bottom: 0.4rem;
-  }
-  h1 span { color: var(--accent); }
-  .header-sub {
-    font-size: 13px; color: var(--text2);
-    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-    margin-top: 0.5rem;
-  }
-  .header-sub a {
-    color: var(--accent); text-decoration: none; font-size: 12px;
-    border-bottom: 1px solid rgba(0,194,255,0.3);
-    transition: border-color 0.2s;
-  }
-  .header-sub a:hover { border-color: var(--accent); }
-  .dot { color: var(--text3); }
+/* METRIC CARDS */
+.metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.metric-card:hover { border-color: var(--border2); }
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.metric-card.good::before { background: var(--green); }
+.metric-card.warn::before { background: var(--amber); }
+.metric-card.bad::before  { background: var(--red); }
+.metric-card.neutral::before { background: var(--blue); }
+.mc-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.mc-value { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.mc-value.good { color: var(--green); }
+.mc-value.warn { color: var(--amber); }
+.mc-value.bad  { color: var(--red); }
+.mc-delta { font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px; }
+.mc-delta.up   { color: var(--green); }
+.mc-delta.down { color: var(--red); }
+.mc-sub { font-size: 11px; color: var(--muted2); }
+.pbar { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.pfill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.pfill.green { background: var(--green); }
+.pfill.amber { background: var(--amber); }
+.pfill.red   { background: var(--red); }
+.pfill.blue  { background: var(--blue); }
 
-  /* LAYOUT */
-  main { padding: 2rem 2.5rem; max-width: 1200px; margin: 0 auto; }
+/* CHARTS ROW */
+.charts-row { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,0.6fr); gap: 16px; }
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 20px;
+}
+.chart-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.chart-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 220px; }
 
-  /* SECTION LABEL */
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px; font-weight: 500;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 0.75rem;
-  }
+/* TABS */
+.tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 4px; width: fit-content; }
+.tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+  letter-spacing: 0.04em;
+}
+.tab.active { background: var(--surface3); color: var(--text); }
+.tab:hover:not(.active) { color: var(--text); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-  /* KPI CARDS */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem; margin-bottom: 2rem;
-  }
-  .kpi {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    position: relative; overflow: hidden;
-  }
-  .kpi::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .kpi.green::after { background: var(--green); }
-  .kpi.blue::after { background: var(--accent); }
-  .kpi.yellow::after { background: var(--yellow); }
-  .kpi.purple::after { background: var(--accent2); }
-  .kpi-label { font-size: 11px; color: var(--text2); margin-bottom: 0.4rem; font-weight: 500; }
-  .kpi-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
-  .kpi-value.green { color: var(--green); }
-  .kpi-value.blue { color: var(--accent); }
-  .kpi-value.yellow { color: var(--yellow); }
-  .kpi-value.purple { color: var(--accent2); }
-  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 0.4rem; }
+/* TABLES */
+.table-wrap { border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  background: var(--surface2);
+  padding: 10px 12px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.tc { text-align: center; }
 
-  /* TWO COL */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+/* BADGES */
+.bdg {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+.bdg.g { background: var(--green-bg); color: var(--green); border: 1px solid rgba(109,184,122,0.25); }
+.bdg.a { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(212,148,74,0.25); }
+.bdg.r { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(201,96,96,0.25); }
+.bdg.b { background: var(--blue-bg);  color: var(--blue);  border: 1px solid rgba(107,159,212,0.25); }
+.bdg.p { background: var(--purple-bg);color: var(--purple);border: 1px solid rgba(155,132,212,0.25); }
+.bdg.gy{ background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
 
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-  }
-  .card-title {
-    font-size: 13px; font-weight: 600;
-    margin-bottom: 1.25rem; color: var(--text);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card-title .icon { font-size: 15px; }
+/* HHH CARDS */
+.hhh-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+.hhh-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.hhh-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+.hhh-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.hhh-desc { font-size: 11px; color: var(--muted); }
+.hhh-body { padding: 14px 18px; }
+.hhh-metric { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.hhh-metric:last-child { border-bottom: none; }
+.hhh-metric-name { color: var(--text); }
+.hhh-metric-val { font-family: var(--font-mono); font-size: 11px; }
 
-  /* RUN COMPARISON TABLE */
-  .run-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .run-table th {
-    text-align: left; font-weight: 600; font-size: 11px;
-    color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase;
-    padding: 0 0.75rem 0.75rem; border-bottom: 1px solid var(--border);
-  }
-  .run-table td {
-    padding: 0.65rem 0.75rem;
-    border-bottom: 1px solid rgba(30,45,69,0.5);
-    font-family: 'DM Mono', monospace; font-size: 12px;
-  }
-  .run-table tr:last-child td { border-bottom: none; }
-  .run-table tr.best td { background: rgba(16,185,129,0.05); }
-  .pill {
-    display: inline-block;
-    padding: 2px 8px; border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-    font-family: 'DM Mono', monospace;
-  }
-  .pill.green { background: rgba(16,185,129,0.15); color: var(--green); }
-  .pill.yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-  .pill.red { background: rgba(239,68,68,0.15); color: var(--red); }
-  .pill.blue { background: rgba(0,194,255,0.15); color: var(--accent); }
-  .delta { font-size: 11px; color: var(--green); margin-left: 4px; }
-  .delta.neg { color: var(--red); }
+/* CONFUSION MATRIX */
+.cfm-wrap { overflow-x: auto; }
+.cfm table { min-width: 500px; }
+.cfm th { font-size: 10px; text-align: center; padding: 8px 6px; }
+.cfm td { text-align: center; font-family: var(--font-mono); font-size: 13px; font-weight: 500; padding: 12px 8px; min-width: 60px; }
+.cfm .row-hdr { text-align: left; font-family: var(--font-mono); font-size: 10px; color: var(--muted); padding: 8px 10px; background: var(--surface2); }
+.cfm .tp { background: rgba(109,184,122,0.2); color: var(--green); }
+.cfm .fn { background: rgba(201,96,96,0.12); color: var(--red); }
+.cfm .tn { color: var(--muted2); font-size: 11px; font-weight: 400; }
 
-  /* CONFUSION MATRIX */
-  .matrix-wrap { overflow-x: auto; }
-  .matrix-table { border-collapse: collapse; font-size: 12px; width: 100%; }
-  .matrix-table th {
-    padding: 6px 8px; font-size: 10px; font-weight: 600;
-    color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em;
-  }
-  .matrix-table td {
-    padding: 8px; text-align: center;
-    border: 1px solid var(--border);
-    font-family: 'DM Mono', monospace; font-size: 12px;
-    min-width: 36px;
-  }
-  .matrix-table td.tp { background: rgba(16,185,129,0.25); color: var(--green); font-weight: 700; }
-  .matrix-table td.fp { background: rgba(239,68,68,0.12); color: var(--red); }
-  .matrix-table td.zero { color: var(--text3); }
-  .matrix-table .row-label { text-align: left; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 11px; white-space: nowrap; padding-right: 12px; }
-  .matrix-table .col-label { color: var(--text2); font-size: 10px; white-space: nowrap; }
-  .axis-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+/* RUN COMPARISON */
+.run-pills { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.run-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.run-pill.r1 { border-color: rgba(107,159,212,0.4); color: var(--blue); background: var(--blue-bg); }
+.run-pill.r2 { border-color: rgba(212,148,74,0.4); color: var(--amber); background: var(--amber-bg); }
+.run-pill.r3 { border-color: rgba(109,184,122,0.4); color: var(--green); background: var(--green-bg); }
+.run-pill.r4 { border-color: rgba(155,132,212,0.4); color: var(--purple); background: var(--purple-bg); }
 
-  /* DATA TABLE */
-  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .data-table th {
-    text-align: left; font-weight: 600; font-size: 10px;
-    color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 0 0.75rem 0.6rem; border-bottom: 1px solid var(--border);
-  }
-  .data-table td {
-    padding: 0.55rem 0.75rem;
-    border-bottom: 1px solid rgba(30,45,69,0.4);
-    color: var(--text2); font-size: 12px;
-  }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table td.subject { color: var(--text); font-weight: 500; max-width: 180px; }
-  .correct { color: var(--green); }
-  .incorrect { color: var(--red); }
-  .check::before { content: '✓ '; }
-  .cross::before { content: '✗ '; }
+/* GLOSSARY */
+.glossary-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.gloss-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+}
+.gloss-term { font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-bottom: 6px; font-weight: 500; }
+.gloss-def { font-size: 12px; color: var(--muted); line-height: 1.65; }
+.gloss-formula {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-top: 8px;
+  color: var(--accent2);
+  display: inline-block;
+}
 
-  /* PROGRESS BAR */
-  .progress-row { margin-bottom: 0.9rem; }
-  .progress-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .progress-label span:first-child { font-size: 12px; color: var(--text2); }
-  .progress-label span:last-child { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); font-weight: 600; }
-  .progress-bar { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+/* FRAMEWORK LAYERS */
+.layer-grid { display: grid; gap: 2px; }
+.layer-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  align-items: start;
+}
+.layer-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+.layer-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.layer-items { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 1.5rem 2.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem;
-    font-size: 12px; color: var(--text3);
-  }
-  footer a { color: var(--accent); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-  .hhh-pills { display: flex; gap: 8px; }
-  .hhh-pill {
-    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
-    border: 1px solid;
-  }
-  .hhh-pill.h1 { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.08); }
-  .hhh-pill.h2 { border-color: var(--text3); color: var(--text3); background: transparent; }
-  .hhh-pill.h3 { border-color: var(--text3); color: var(--text3); background: transparent; }
-  .hhh-note { font-size: 11px; color: var(--text3); margin-top: 4px; }
+/* SCORECARD */
+.scorecard { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+.sc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+  text-align: center;
+}
+.sc-metric { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.sc-val { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.sc-target { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); margin-bottom: 8px; }
+
+/* FOOTER */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 48px;
+}
+.footer-left { font-size: 12px; color: var(--muted2); }
+.footer-right { display: flex; gap: 16px; }
+.footer-link { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.05em; }
+.footer-link:hover { color: var(--accent); }
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13,13,13,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 48px;
+}
+.nav-brand {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent2);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  margin-right: auto;
+}
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.nav-link:hover { color: var(--text); }
+
+/* PROGRESS LEGEND */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* FADE IN */
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+.section { animation: fadeUp 0.4s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .charts-row { grid-template-columns: 1fr; }
+  .hhh-grid { grid-template-columns: 1fr; }
+  .scorecard { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .glossary-grid { grid-template-columns: 1fr; }
+  .layer-row { grid-template-columns: 1fr; }
+  .layer-num { padding-top: 0; }
+}
+@media (max-width: 480px) {
+  .metric-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-badge">The Eval Engineer's Playbook · Article 2</div>
-  <h1>AI Email Classifier <span>Eval Dashboard</span></h1>
-  <div class="header-sub">
-    <span>Hiren Shah · Director, Platform Support @ Cloud Software Group</span>
-    <span class="dot">·</span>
-    <span>10 emails · 4 prompt runs · n8n + Claude + Google Sheets</span>
-    <span class="dot">·</span>
-    <a href="https://www.linkedin.com/pulse/we-set-launch-criteria-traditional-software-features-all-hiren-shah-7dhfc/" target="_blank">Read Article 1 → HHH Framework</a>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#">HHH · EVAL · FRAMEWORK</a>
+    <a class="nav-link" href="#results">Results</a>
+    <a class="nav-link" href="#runs">Runs</a>
+    <a class="nav-link" href="#hhh">HHH</a>
+    <a class="nav-link" href="#glossary">Glossary</a>
+    <a class="nav-link" href="#framework">Framework</a>
   </div>
-</header>
+</nav>
 
-<main>
+<div class="page">
 
-  <!-- KPI ROW -->
-  <div class="section-label">Final Run Performance (Run 4)</div>
-  <div class="kpi-grid">
-    <div class="kpi green">
-      <div class="kpi-label">Category Accuracy</div>
-      <div class="kpi-value green">80%</div>
-      <div class="kpi-sub">8 of 10 correct</div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-label">Priority Accuracy</div>
-      <div class="kpi-value blue">90%</div>
-      <div class="kpi-sub">9 of 10 correct</div>
-    </div>
-    <div class="kpi yellow">
-      <div class="kpi-label">Prompt Iterations</div>
-      <div class="kpi-value yellow">4</div>
-      <div class="kpi-sub">Baseline → optimised</div>
-    </div>
-    <div class="kpi purple">
-      <div class="kpi-label">Dataset Size</div>
-      <div class="kpi-value purple">10</div>
-      <div class="kpi-sub">Ground truth emails</div>
+  <div class="hero">
+    <div class="hero-eyebrow">AI evaluation framework</div>
+    <h1>Helpful · Honest<br><em>Harmless</em></h1>
+    <p class="hero-sub">A universal evaluation framework for AI agentic systems. Built from prompt tuning experiments on an email classifier — generalized to any application, any data source.</p>
+    <div class="hero-meta">
+      <span class="tag green">Precision · Recall · F1</span>
+      <span class="tag blue">4 prompt iterations</span>
+      <span class="tag amber">GPT-4o-mini</span>
+      <span class="tag purple">10 eval cases</span>
+      <span class="tag">n8n eval-workflow</span>
+      <span class="tag">Google Sheets</span>
     </div>
   </div>
 
-  <!-- RUN COMPARISON + PER-CLASS -->
-  <div class="two-col">
-    <div class="card">
-      <div class="card-title"><span class="icon">📈</span> Prompt Iteration Results</div>
-      <table class="run-table">
+  <!-- RESULTS -->
+  <div class="section" id="results">
+    <div class="section-label">Run 4 — current best results</div>
+    <div class="metric-grid" id="headline-cards"></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section">
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Accuracy + F1 — four-run progression</div>
+        <div class="chart-sub">Category accuracy, priority accuracy, macro F1 across all prompt iterations</div>
+        <div class="chart-wrap"><canvas id="trendChart" role="img" aria-label="Line chart showing accuracy and F1 improvement from Run 1 through Run 4">Trend chart.</canvas></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#6b9fd4;"></div>Category accuracy</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#6db87a;"></div>Priority accuracy</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#d4944a;border-top:2px dashed #d4944a;"></div>Macro F1</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Priority distribution</div>
+        <div class="chart-sub">Ground truth vs Run 4 predicted</div>
+        <div class="chart-wrap"><canvas id="prioChart" role="img" aria-label="Stacked bar chart comparing priority distributions">Priority chart.</canvas></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#c96060;"></div>High</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#d4944a;"></div>Critical</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#6b9fd4;"></div>Medium</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#6db87a;"></div>Low</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PER CLASS -->
+  <div class="section">
+    <div class="section-label">Per-category metrics — Run 4</div>
+    <div class="table-wrap">
+      <table>
         <thead>
           <tr>
-            <th>Run</th>
-            <th>Change</th>
-            <th>Category</th>
-            <th>Priority</th>
+            <th style="width:22%;">Category</th>
+            <th class="tc" style="width:7%;">TP</th>
+            <th class="tc" style="width:7%;">FP</th>
+            <th class="tc" style="width:7%;">FN</th>
+            <th class="tc" style="width:7%;">TN</th>
+            <th class="tc" style="width:12%;">Precision</th>
+            <th class="tc" style="width:11%;">Recall</th>
+            <th class="tc" style="width:10%;">F1</th>
+            <th style="width:17%;">Status</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>Run 1</td>
-            <td style="color:var(--text2)">Baseline</td>
-            <td><span class="pill red">50%</span></td>
-            <td><span class="pill yellow">60%</span></td>
-          </tr>
-          <tr>
-            <td>Run 2</td>
-            <td style="color:var(--text2)">JSON format</td>
-            <td><span class="pill yellow">60%</span><span class="delta">+10%</span></td>
-            <td><span class="pill yellow">60%</span></td>
-          </tr>
-          <tr>
-            <td>Run 3</td>
-            <td style="color:var(--text2)">+ Definitions</td>
-            <td><span class="pill green">80%</span><span class="delta">+20%</span></td>
-            <td><span class="pill yellow">70%</span><span class="delta">+10%</span></td>
-          </tr>
-          <tr class="best">
-            <td><strong>Run 4</strong></td>
-            <td style="color:var(--text2)">+ Rules</td>
-            <td><span class="pill green">80%</span></td>
-            <td><span class="pill green">90%</span><span class="delta">+20%</span></td>
-          </tr>
-        </tbody>
+        <tbody id="class-tbody"></tbody>
       </table>
-      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
-        <div style="font-size:11px; color:var(--text3);">Total gain across 4 runs</div>
-        <div style="display:flex; gap:1rem; margin-top:6px;">
-          <span style="font-size:13px; color:var(--green); font-weight:600;">Category +30%</span>
-          <span style="font-size:13px; color:var(--accent); font-weight:600;">Priority +30%</span>
+    </div>
+  </div>
+
+  <!-- FOUR RUN COMPARISON -->
+  <div class="section" id="runs">
+    <div class="section-label">Four-run comparison</div>
+
+    <div class="run-pills">
+      <span class="run-pill r1">Run 1 — original prompt (simulation on)</span>
+      <span class="run-pill r2">Run 2 — phase 2 prompt (simulation on, not saved)</span>
+      <span class="run-pill r3">Run 3 — phase 3 prompt (simulation removed)</span>
+      <span class="run-pill r4">Run 4 — phase 4 prompt (taxonomy + disambiguation)</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('case-tab', this)">Case breakdown</button>
+      <button class="tab" onclick="showTab('f1-tab', this)">F1 progression</button>
+      <button class="tab" onclick="showTab('cfm-tab', this)">Confusion matrix</button>
+    </div>
+
+    <div id="case-tab" class="tab-content active">
+      <div class="table-wrap">
+        <table style="min-width:700px;">
+          <thead>
+            <tr>
+              <th style="width:14%;">Subject</th>
+              <th style="width:12%;">True category</th>
+              <th style="width:11%;">Run 1</th>
+              <th style="width:11%;">Run 2</th>
+              <th style="width:11%;">Run 3</th>
+              <th style="width:11%;">Run 4</th>
+              <th style="width:7%;">True prio</th>
+              <th style="width:7%;">R4 prio</th>
+              <th style="width:8%;text-align:center;">Prio ✓</th>
+              <th style="width:8%;text-align:center;">Trend</th>
+            </tr>
+          </thead>
+          <tbody id="case-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="f1-tab" class="tab-content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:22%;">Category</th>
+              <th class="tc" style="width:11%;">R1 F1</th>
+              <th class="tc" style="width:11%;">R2 F1</th>
+              <th class="tc" style="width:11%;">R3 F1</th>
+              <th class="tc" style="width:11%;">R4 F1</th>
+              <th class="tc" style="width:12%;">R1→R4 delta</th>
+              <th class="tc" style="width:10%;">R4 prec</th>
+              <th class="tc" style="width:10%;">R4 recall</th>
+              <th style="width:12%;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="f1-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="cfm-tab" class="tab-content">
+      <div class="table-wrap cfm-wrap">
+        <div class="cfm"><table id="cfm-table"></table></div>
+      </div>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(109,184,122,0.3);"></div>TP — correct prediction</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(201,96,96,0.2);"></div>FN — missed (should have predicted)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.05);"></div>TN — correct rejection (0)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F1 BAR CHART -->
+  <div class="section">
+    <div class="section-label">F1 per category — all four runs</div>
+    <div class="chart-card">
+      <div class="chart-wrap" style="height:260px;"><canvas id="f1Chart" role="img" aria-label="Grouped bar chart F1 per category across four runs">F1 per category chart.</canvas></div>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-item"><div class="legend-dot" style="background:#6b9fd4;"></div>Run 1</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d4944a;"></div>Run 2</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#9b84d4;"></div>Run 3</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#6db87a;"></div>Run 4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HHH FRAMEWORK -->
+  <div class="section" id="hhh">
+    <div class="section-label">HHH evaluation dimensions</div>
+    <div class="hhh-grid">
+      <div class="hhh-card">
+        <div class="hhh-header" style="background:var(--blue-bg);border-color:rgba(107,159,212,0.2);">
+          <div class="hhh-title" style="color:var(--blue);">H1 — Helpful</div>
+          <div class="hhh-desc">Did the AI correctly solve the task?</div>
+        </div>
+        <div class="hhh-body">
+          <div class="hhh-metric"><span class="hhh-metric-name">Task accuracy</span><span class="hhh-metric-val" style="color:var(--blue);">primary</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Precision per class</span><span class="hhh-metric-val">TP÷(TP+FP)</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Recall per class</span><span class="hhh-metric-val">TP÷(TP+FN)</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">F1 score</span><span class="hhh-metric-val">harmonic mean</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Macro / weighted F1</span><span class="hhh-metric-val">across classes</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Semantic similarity</span><span class="hhh-metric-val">text outputs</span></div>
+          <div class="hhh-metric" style="border:none;"><span class="hhh-metric-name">Task completion rate</span><span class="hhh-metric-val">agents</span></div>
+        </div>
+      </div>
+      <div class="hhh-card">
+        <div class="hhh-header" style="background:var(--green-bg);border-color:rgba(109,184,122,0.2);">
+          <div class="hhh-title" style="color:var(--green);">H2 — Honest</div>
+          <div class="hhh-desc">Did the AI tell the truth and know its limits?</div>
+        </div>
+        <div class="hhh-body">
+          <div class="hhh-metric"><span class="hhh-metric-name">Hallucination rate</span><span class="hhh-metric-val" style="color:var(--red);">critical</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Factual accuracy</span><span class="hhh-metric-val">vs ground truth</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Confidence calibration</span><span class="hhh-metric-val">stated vs actual</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Uncertainty flag rate</span><span class="hhh-metric-val">"I don't know"</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Source attribution</span><span class="hhh-metric-val">cited vs uncited</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Contradiction rate</span><span class="hhh-metric-val">internal</span></div>
+          <div class="hhh-metric" style="border:none;"><span class="hhh-metric-name">Grounding score</span><span class="hhh-metric-val">RAG only</span></div>
+        </div>
+      </div>
+      <div class="hhh-card">
+        <div class="hhh-header" style="background:var(--amber-bg);border-color:rgba(212,148,74,0.2);">
+          <div class="hhh-title" style="color:var(--amber);">H3 — Harmless</div>
+          <div class="hhh-desc">Did the AI avoid causing harm?</div>
+        </div>
+        <div class="hhh-body">
+          <div class="hhh-metric"><span class="hhh-metric-name">Toxicity rate</span><span class="hhh-metric-val" style="color:var(--red);">critical</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Bias detection</span><span class="hhh-metric-val">demographic parity</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">PII leakage rate</span><span class="hhh-metric-val" style="color:var(--red);">critical</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Refusal precision</span><span class="hhh-metric-val">correct refusals</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Refusal recall</span><span class="hhh-metric-val">missed refusals</span></div>
+          <div class="hhh-metric"><span class="hhh-metric-name">Sensitive topic handling</span><span class="hhh-metric-val">escalation</span></div>
+          <div class="hhh-metric" style="border:none;"><span class="hhh-metric-name">Jailbreak resistance</span><span class="hhh-metric-val">adversarial</span></div>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title"><span class="icon">🎯</span> Per-Class Accuracy (Run 4)</div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Account Access</span><span>100%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+    <div style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:20px;">
+      <div style="font-size:13px;font-weight:500;margin-bottom:14px;color:var(--text);">HHH composite score formula</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 28px 1.2fr;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div style="text-align:center;padding:14px;background:var(--blue-bg);border:1px solid rgba(107,159,212,0.2);border-radius:var(--r);">
+          <div style="font-size:11px;color:var(--blue);margin-bottom:4px;">Helpful score</div>
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--blue);">H₁</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">task metrics avg</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--green-bg);border:1px solid rgba(109,184,122,0.2);border-radius:var(--r);">
+          <div style="font-size:11px;color:var(--green);margin-bottom:4px;">Honest score</div>
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--green);">H₂</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">hallucination + calibration</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--amber-bg);border:1px solid rgba(212,148,74,0.2);border-radius:var(--r);">
+          <div style="font-size:11px;color:var(--amber);margin-bottom:4px;">Harmless score</div>
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--amber);">H₃</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">toxicity + bias + PII</div>
+        </div>
+        <div style="text-align:center;font-size:18px;color:var(--muted);">→</div>
+        <div style="text-align:center;padding:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">HHH composite</div>
+          <div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);">w₁H₁+w₂H₂+w₃H₃</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">weights tunable per app</div>
+        </div>
       </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Billing</span><span>100%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Bug Report</span><span>100%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>General Inquiry</span><span>100%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Feature Request</span><span>0%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Integration Issue</span><span>0%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Performance Issue</span><span>100%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Technical Issue</span><span>50%</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--yellow)"></div></div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--surface2);border-radius:var(--r);font-size:11px;color:var(--muted);line-height:1.7;">
+        <span style="color:var(--text);font-weight:500;">Classifier:</span> H₁:0.60 H₂:0.30 H₃:0.10 &nbsp;·&nbsp;
+        <span style="color:var(--text);font-weight:500;">Chatbot:</span> H₁:0.40 H₂:0.30 H₃:0.30 &nbsp;·&nbsp;
+        <span style="color:var(--text);font-weight:500;">RAG:</span> H₁:0.30 H₂:0.50 H₃:0.20 &nbsp;·&nbsp;
+        <span style="color:var(--text);font-weight:500;">Agent:</span> H₁:0.30 H₂:0.30 H₃:0.40 &nbsp;·&nbsp;
+        <span style="color:var(--text);font-weight:500;">Support:</span> H₁:0.40 H₂:0.20 H₃:0.40
       </div>
     </div>
   </div>
 
-  <!-- CONFUSION MATRIX -->
-  <div class="card" style="margin-bottom:2rem;">
-    <div class="card-title"><span class="icon">🔲</span> Category Confusion Matrix (Run 4 — Final)</div>
-    <div class="matrix-wrap">
-      <table class="matrix-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th class="col-label">Acct Access</th>
-            <th class="col-label">Feature Req</th>
-            <th class="col-label">Billing</th>
-            <th class="col-label">Bug Report</th>
-            <th class="col-label">Acct Support</th>
-            <th class="col-label">General Inq</th>
-            <th class="col-label">Tech Issue</th>
-            <th class="col-label">Perf Issue</th>
-            <th class="col-label">Integ Issue</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="row-label">Account Access</td>
-            <td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Feature Request</td>
-            <td class="zero">0</td><td class="fp">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="fp">1</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Billing</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="tp">2</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Bug Report</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Account Support</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">General Inquiry</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Technical Issue</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="fp">1</td>
-          </tr>
-          <tr>
-            <td class="row-label">Performance Issue</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td>
-          </tr>
-          <tr>
-            <td class="row-label">Integration Issue</td>
-            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="fp">1</td><td class="zero">0</td><td class="fp">0</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="axis-label" style="margin-top:8px;">Rows = Ground Truth · Columns = Predicted · Green diagonal = correct · Red = misclassified</div>
-    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; gap:2rem; flex-wrap:wrap;">
-      <div>
-        <div style="font-size:11px; color:var(--text3);">Key misclassification</div>
-        <div style="font-size:13px; color:var(--red); margin-top:3px;">Feature Request → "Feature Enhancement Request"</div>
+  <!-- PHASE 2 SCORECARD -->
+  <div class="section">
+    <div class="section-label">Phase 2 target scorecard — final results</div>
+    <div class="scorecard" id="scorecard"></div>
+  </div>
+
+  <!-- DATA SOURCES -->
+  <div class="section">
+    <div class="section-label">Universal data source connectors</div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+        <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px;">Excel / CSV</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">Local file or directory scan. Auto-detect column pairs by naming convention.</div>
       </div>
-      <div>
-        <div style="font-size:11px; color:var(--text3);">Key misclassification</div>
-        <div style="font-size:13px; color:var(--red); margin-top:3px;">Integration Issue → "Technical Issue"</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+        <div style="font-size:12px;font-weight:500;color:var(--blue);margin-bottom:6px;">Google Sheets</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">Sheets API or Drive MCP. Multiple tabs = multiple runs, auto-detected.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+        <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:6px;">Database</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">Postgres · MySQL · SQLite. Pass a SQL query that returns the universal schema.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+        <div style="font-size:12px;font-weight:500;color:var(--purple);margin-bottom:6px;">Cloud / DW</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">Snowflake · BigQuery · AWS S3. Direct table or Parquet file query.</div>
       </div>
     </div>
   </div>
 
-  <!-- RAW DATA TABLE -->
-  <div class="card" style="margin-bottom:2rem;">
-    <div class="card-title"><span class="icon">📋</span> All 10 Emails — Ground Truth vs Run 4 Predictions</div>
-    <div style="overflow-x:auto;">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Subject</th>
-            <th>GT Category</th>
-            <th>GT Priority</th>
-            <th>Pred Category</th>
-            <th>Pred Priority</th>
-            <th>Cat ✓</th>
-            <th>Pri ✓</th>
-          </tr>
-        </thead>
-        <tbody id="dataRows"><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">01</td>
-    <td class="subject">Unable to login to my account</td>
-    <td style="font-size:11px">Account Access</td>
-    <td><span class="pill yellow">High</span></td>
-    <td style="font-size:11px;color:var(--green)">Account Access</td>
-    <td><span class="pill yellow">High</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">02</td>
-    <td class="subject">Feature request for dark mode</td>
-    <td style="font-size:11px">Feature Request</td>
-    <td><span class="pill green">Low</span></td>
-    <td style="font-size:11px;color:var(--red)">Feature Enhancement Request</td>
-    <td><span class="pill green">Low</span></td>
-    <td class="incorrect cross">No</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">03</td>
-    <td class="subject">Payment failed during checkout</td>
-    <td style="font-size:11px">Billing</td>
-    <td><span class="pill yellow">High</span></td>
-    <td style="font-size:11px;color:var(--green)">Billing</td>
-    <td><span class="pill yellow">High</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">04</td>
-    <td class="subject">App crashing on startup</td>
-    <td style="font-size:11px">Bug Report</td>
-    <td><span class="pill red">Critical</span></td>
-    <td style="font-size:11px;color:var(--green)">Bug Report</td>
-    <td><span class="pill yellow">High</span></td>
-    <td class="correct check">Yes</td>
-    <td class="incorrect cross">No</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">05</td>
-    <td class="subject">Need help with password reset</td>
-    <td style="font-size:11px">Account Support</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td style="font-size:11px;color:var(--green)">Account Support</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">06</td>
-    <td class="subject">Question about pricing plans</td>
-    <td style="font-size:11px">General Inquiry</td>
-    <td><span class="pill green">Low</span></td>
-    <td style="font-size:11px;color:var(--green)">General Inquiry</td>
-    <td><span class="pill green">Low</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">07</td>
-    <td class="subject">Cannot upload files</td>
-    <td style="font-size:11px">Technical Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td style="font-size:11px;color:var(--green)">Technical Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">08</td>
-    <td class="subject">Refund request</td>
-    <td style="font-size:11px">Billing</td>
-    <td><span class="pill yellow">High</span></td>
-    <td style="font-size:11px;color:var(--green)">Billing</td>
-    <td><span class="pill yellow">High</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">09</td>
-    <td class="subject">Slow performance in dashboard</td>
-    <td style="font-size:11px">Performance Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td style="font-size:11px;color:var(--green)">Performance Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td class="correct check">Yes</td>
-    <td class="correct check">Yes</td>
-  </tr><tr>
-    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">10</td>
-    <td class="subject">Integration with Slack not working</td>
-    <td style="font-size:11px">Integration Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td style="font-size:11px;color:var(--red)">Technical Issue</td>
-    <td><span class="pill blue">Medium</span></td>
-    <td class="incorrect cross">No</td>
-    <td class="correct check">Yes</td>
-  </tr></tbody>
-      </table>
+  <!-- FRAMEWORK LAYERS -->
+  <div class="section" id="framework">
+    <div class="section-label">Framework architecture — 5 layers</div>
+    <div class="layer-grid">
+      <div class="layer-row">
+        <div class="layer-num">Layer 1</div>
+        <div>
+          <div class="layer-title">Data ingestion</div>
+          <div class="layer-items">
+            <span class="tag">Excel / CSV</span><span class="tag">Google Sheets</span><span class="tag">Postgres</span><span class="tag">Snowflake</span><span class="tag">BigQuery</span><span class="tag">REST API</span>
+          </div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">Layer 2</div>
+        <div>
+          <div class="layer-title">Eval dimensions — HHH</div>
+          <div class="layer-items">
+            <span class="tag blue">H1 Helpful</span><span class="tag green">H2 Honest</span><span class="tag amber">H3 Harmless</span>
+          </div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">Layer 3</div>
+        <div>
+          <div class="layer-title">Scoring engine</div>
+          <div class="layer-items">
+            <span class="tag">Precision</span><span class="tag">Recall</span><span class="tag">F1</span><span class="tag">Confusion matrix</span><span class="tag">ROUGE / BLEU</span><span class="tag">LLM-as-judge</span><span class="tag">Human eval</span>
+          </div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">Layer 4</div>
+        <div>
+          <div class="layer-title">HHH composite + thresholds</div>
+          <div class="layer-items">
+            <span class="tag">Weighted composite score</span><span class="tag">Production readiness gates</span><span class="tag">Alert thresholds</span>
+          </div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">Layer 5</div>
+        <div>
+          <div class="layer-title">Outputs</div>
+          <div class="layer-items">
+            <span class="tag">Eval dashboard</span><span class="tag">Downloadable report</span><span class="tag">Run comparison</span><span class="tag">Failure patterns</span><span class="tag">Threshold alerts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOSSARY -->
+  <div class="section" id="glossary">
+    <div class="section-label">Metric glossary</div>
+    <div class="glossary-grid">
+      <div class="gloss-card">
+        <div class="gloss-term">True Positive (TP)</div>
+        <div class="gloss-def">The model predicted a label AND it was correct. A direct hit. Higher is always better.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">False Positive (FP)</div>
+        <div class="gloss-def">The model predicted a label but it was wrong — a false alarm. Erodes trust and wastes downstream effort.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">False Negative (FN)</div>
+        <div class="gloss-def">The model missed a real case — should have predicted but didn't. For support use cases, often worse than FP. A missed Billing or Bug Report goes unaddressed.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">True Negative (TN)</div>
+        <div class="gloss-def">Correctly did NOT predict a class for a case that wasn't that class. Warning: TN inflates automatically on small datasets with rare classes. With 10 cases and 8 categories, TN=9 is nearly automatic. Do not use as primary metric.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">Precision</div>
+        <div class="gloss-def">Of all times the model predicted class X, how often was it right? Use when false alarms are costly.</div>
+        <div class="gloss-formula">TP ÷ (TP + FP)</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">Recall</div>
+        <div class="gloss-def">Of all actual class X cases, how many did the model catch? Use when missing a case is costly — billing, crashes, security.</div>
+        <div class="gloss-formula">TP ÷ (TP + FN)</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">F1 Score</div>
+        <div class="gloss-def">Harmonic mean of Precision and Recall. If either is bad, F1 suffers. Use as your primary accuracy signal. Scale: 90-100% production ready · 70-89% acceptable · 50-69% needs work · below 50% not ready.</div>
+        <div class="gloss-formula">2 × P × R ÷ (P + R)</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">Macro F1</div>
+        <div class="gloss-def">Simple average of per-class F1 scores. Treats all classes equally — best for revealing zero-recall categories that a weighted average would hide.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">Hallucination rate</div>
+        <div class="gloss-def">Percentage of AI outputs containing fabricated or unsupported facts. Critical for RAG, summarization, factual Q&A. Target: below 2-5% depending on app type.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">Confidence calibration</div>
+        <div class="gloss-def">How well stated confidence matches actual accuracy. A well-calibrated model that says "90% confident" is right 90% of the time. Measured as |stated confidence − actual accuracy|.</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">LLM-as-judge</div>
+        <div class="gloss-def">Using a more capable model (GPT-4) to score another model's outputs against a rubric. Scales human evaluation. Scores 1-5 per dimension. Validate by checking agreement with human annotators using Cohen's Kappa (target: above 0.6).</div>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-term">ROUGE / BLEU</div>
+        <div class="gloss-def">Text overlap metrics for generation tasks. ROUGE measures recall (good for summarization). BLEU measures precision (good for translation). Neither captures semantic meaning — pair with embedding similarity.</div>
+      </div>
     </div>
   </div>
 
-  <!-- HHH STATUS -->
-  <div class="card" style="margin-bottom:2rem;">
-    <div class="card-title"><span class="icon">🧭</span> HHH Compliance Status</div>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem;">
-      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--green);">
-        <div style="font-size:12px; font-weight:700; color:var(--green); margin-bottom:6px;">H1 — Helpful ✓ MEASURED</div>
-        <div style="font-size:12px; color:var(--text2);">Category: 80% · Priority: 90%<br>F1 threshold met (≥70%)</div>
-      </div>
-      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--text3);">
-        <div style="font-size:12px; font-weight:700; color:var(--text3); margin-bottom:6px;">H2 — Honest ⏳ PENDING</div>
-        <div style="font-size:12px; color:var(--text3);">Confidence calibration not yet measured.<br>Coming in Article 3.</div>
-      </div>
-      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--text3);">
-        <div style="font-size:12px; font-weight:700; color:var(--text3); margin-bottom:6px;">H3 — Harmless ⏳ PENDING</div>
-        <div style="font-size:12px; color:var(--text3);">Bias / demographic consistency not yet measured.<br>Coming in Article 3.</div>
-      </div>
+  <div class="footer">
+    <div class="footer-left">HHH Eval Framework v1.0 · Built by Hiren Shah · n8n + GPT-4o-mini + Google Sheets</div>
+    <div class="footer-right">
+      <a class="footer-link" href="https://linkedin.com/in/hiren-shah-6365b91" target="_blank">LinkedIn</a>
+      <a class="footer-link" href="https://github.com/ai-integration-techie" target="_blank">GitHub</a>
     </div>
-    <div class="hhh-note" style="margin-top:1rem;">80% accuracy on H1 is a good result — but a classifier is not HHH-complete until all three dimensions are scored.</div>
   </div>
 
-</main>
-
-<footer>
-  <div>
-    Built by <strong style="color:var(--text)">Hiren Shah</strong> · 
-    <a href="https://www.linkedin.com/in/hiren-shah-6365b91" target="_blank">LinkedIn</a> · 
-    <a href="https://github.com/ai-integration-techie" target="_blank">GitHub</a> · 
-    <a href="https://www.linkedin.com/pulse/we-set-launch-criteria-traditional-software-features-all-hiren-shah-7dhfc/" target="_blank">Article 1: HHH Framework →</a>
-  </div>
-  <div class="hhh-pills">
-    <span class="hhh-pill h1">H1 Helpful</span>
-    <span class="hhh-pill h2">H2 Honest</span>
-    <span class="hhh-pill h3">H3 Harmless</span>
-  </div>
-</footer>
+</div>
 
 <script>
-const data = [
-  { subject: "Unable to login to my account",      gtCat: "Account Access",    gtPri: "High",     predCat: "Account Access",           predPri: "High"     },
-  { subject: "Feature request for dark mode",       gtCat: "Feature Request",   gtPri: "Low",      predCat: "Feature Enhancement Request", predPri: "Low"  },
-  { subject: "Payment failed during checkout",      gtCat: "Billing",           gtPri: "High",     predCat: "Billing",                  predPri: "High"     },
-  { subject: "App crashing on startup",             gtCat: "Bug Report",        gtPri: "Critical", predCat: "Bug Report",               predPri: "High"     },
-  { subject: "Need help with password reset",       gtCat: "Account Support",   gtPri: "Medium",   predCat: "Account Support",          predPri: "Medium"   },
-  { subject: "Question about pricing plans",        gtCat: "General Inquiry",   gtPri: "Low",      predCat: "General Inquiry",          predPri: "Low"      },
-  { subject: "Cannot upload files",                 gtCat: "Technical Issue",   gtPri: "Medium",   predCat: "Technical Issue",          predPri: "Medium"   },
-  { subject: "Refund request",                      gtCat: "Billing",           gtPri: "High",     predCat: "Billing",                  predPri: "High"     },
-  { subject: "Slow performance in dashboard",       gtCat: "Performance Issue", gtPri: "Medium",   predCat: "Performance Issue",        predPri: "Medium"   },
-  { subject: "Integration with Slack not working",  gtCat: "Integration Issue", gtPri: "Medium",   predCat: "Technical Issue",          predPri: "Medium"   },
+const cases=[
+  {subj:"Unable to login",       trueCat:"Account Access",    r1c:"Account Support",             r2c:"Account Support",             r3c:"Account Access",              r4c:"Account Access",    truePrio:"High",     r1p:"High",   r2p:"High",   r3p:"High",   r4p:"High"  },
+  {subj:"Dark mode request",     trueCat:"Feature Request",   r1c:"Feature Enhancement Request", r2c:"Feature Enhancement Request", r3c:"Feature Enhancement Request", r4c:"Feature Enhancement Request", truePrio:"Low",  r1p:"Low",r2p:"Low",r3p:"Low",r4p:"Low"},
+  {subj:"Payment failed",        trueCat:"Billing",           r1c:"Billing",                     r2c:"Billing",                     r3c:"Billing",                     r4c:"Billing",           truePrio:"High",     r1p:"High",   r2p:"High",   r3p:"High",   r4p:"High"  },
+  {subj:"App crashing",          trueCat:"Bug Report",        r1c:"Bug Report",                  r2c:"Bug Report",                  r3c:"Bug Report",                  r4c:"Bug Report",        truePrio:"Critical", r1p:"High",   r2p:"High",   r3p:"High",   r4p:"High"  },
+  {subj:"Password reset help",   trueCat:"Account Support",   r1c:"Account Support",             r2c:"Account Support",             r3c:"Account Support",             r4c:"Account Support",   truePrio:"Medium",   r1p:"Medium", r2p:"High",   r3p:"High",   r4p:"Medium"},
+  {subj:"Pricing plan question", trueCat:"General Inquiry",   r1c:"General Inquiry",             r2c:"Billing",                     r3c:"Billing",                     r4c:"General Inquiry",   truePrio:"Low",      r1p:"Low",    r2p:"Low",    r3p:"Low",    r4p:"Low"   },
+  {subj:"Cannot upload files",   trueCat:"Technical Issue",   r1c:"Technical Issue",             r2c:"Bug Report",                  r3c:"Technical Issue",             r4c:"Technical Issue",   truePrio:"Medium",   r1p:"Medium", r2p:"High",   r3p:"Medium", r4p:"Medium"},
+  {subj:"Refund request",        trueCat:"Billing",           r1c:"Billing",                     r2c:"Billing",                     r3c:"Billing",                     r4c:"Billing",           truePrio:"High",     r1p:"High",   r2p:"High",   r3p:"High",   r4p:"High"  },
+  {subj:"Slow dashboard",        trueCat:"Performance Issue", r1c:"Performance Issue",           r2c:"UI/UX Issue",                 r3c:"Performance Issue",           r4c:"Performance Issue", truePrio:"Medium",   r1p:"Medium", r2p:"Medium", r3p:"Medium", r4p:"Medium"},
+  {subj:"Slack integration",     trueCat:"Integration Issue", r1c:"Technical Issue",             r2c:"Bug Report",                  r3c:"Technical Issue",             r4c:"Technical Issue",   truePrio:"Medium",   r1p:"Medium", r2p:"Medium", r3p:"Medium", r4p:"Medium"},
 ];
+const N=cases.length;
+const trueLabels=[...new Set(cases.map(c=>c.trueCat))].sort();
+const predFns=[c=>c.r1c,c=>c.r2c,c=>c.r3c,c=>c.r4c];
+const prioPredFns=[c=>c.r1p,c=>c.r2p,c=>c.r3p,c=>c.r4p];
 
-const tbody = document.getElementById('dataRows');
-data.forEach((r, i) => {
-  const catMatch = r.gtCat === r.predCat;
-  const priMatch = r.gtPri === r.predPri;
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td style="color:var(--text3);font-family:'DM Mono',monospace">${String(i+1).padStart(2,'0')}</td>
-    <td class="subject">${r.subject}</td>
-    <td style="font-size:11px">${r.gtCat}</td>
-    <td><span class="pill ${r.gtPri==='Critical'?'red':r.gtPri==='High'?'yellow':r.gtPri==='Medium'?'blue':'green'}">${r.gtPri}</span></td>
-    <td style="font-size:11px;color:${catMatch?'var(--green)':'var(--red)'}">${r.predCat}</td>
-    <td><span class="pill ${r.predPri==='Critical'?'red':r.predPri==='High'?'yellow':r.predPri==='Medium'?'blue':'green'}">${r.predPri}</span></td>
-    <td class="${catMatch?'correct check':'incorrect cross'}">${catMatch?'Yes':'No'}</td>
-    <td class="${priMatch?'correct check':'incorrect cross'}">${priMatch?'Yes':'No'}</td>
-  `;
-  tbody.appendChild(row);
+function mets(cat,pf){
+  let tp=0,fp=0,fn=0;
+  cases.forEach(c=>{const iT=c.trueCat===cat,iP=pf(c)===cat;if(iT&&iP)tp++;else if(!iT&&iP)fp++;else if(iT&&!iP)fn++;});
+  const tn=N-tp-fp-fn,prec=(tp+fp)?tp/(tp+fp):0,rec=(tp+fn)?tp/(tp+fn):0,f1=(prec+rec)?2*prec*rec/(prec+rec):0;
+  return{tp,fp,fn,tn,prec,rec,f1};
+}
+function macro(pf){let sP=0,sR=0,sF=0;trueLabels.forEach(c=>{const m=mets(c,pf);sP+=m.prec;sR+=m.rec;sF+=m.f1;});const n=trueLabels.length;return{prec:sP/n,rec:sR/n,f1:sF/n};}
+function catAcc(pf){return cases.filter(c=>c.trueCat===pf(c)).length/N;}
+function prioAcc(pf){return cases.filter(c=>c.truePrio.toLowerCase()===pf(c).toLowerCase()).length/N;}
+function pct(v){return Math.round(v*100)+'%';}
+function fc(v){return v>=0.7?'g':v>=0.4?'a':'r';}
+function pb(p){const m={'high':'r','critical':'a','medium':'b','low':'g'};return`<span class="bdg ${m[p.toLowerCase()]||'gy'}">${p}</span>`;}
+
+const CAs=predFns.map(catAcc),PAs=prioPredFns.map(prioAcc),Ms=predFns.map(macro);
+const r4CatAcc=CAs[3],r4PrioAcc=PAs[3],r4M=Ms[3];
+
+function dl(r,b){const d=Math.round((r-b)*100);return d>0?`<span style="color:var(--green);font-family:var(--font-mono);font-size:10px;">+${d}pp</span>`:d<0?`<span style="color:var(--red);font-family:var(--font-mono);font-size:10px;">${d}pp</span>`:`<span style="color:var(--muted);font-size:10px;">—</span>`;}
+
+// HEADLINE CARDS
+const hc=[
+  {lbl:'Category accuracy',val:r4CatAcc,r1:CAs[0],col:r4CatAcc>=0.7?'good':'warn',vc:r4CatAcc>=0.7?'good':'warn',pc:r4CatAcc>=0.7?'green':'amber'},
+  {lbl:'Priority accuracy', val:r4PrioAcc,r1:PAs[0],col:r4PrioAcc>=0.7?'good':'warn',vc:r4PrioAcc>=0.7?'good':'warn',pc:r4PrioAcc>=0.7?'green':'amber'},
+  {lbl:'Macro precision',   val:r4M.prec,r1:Ms[0].prec,col:'neutral',vc:r4M.prec>=0.7?'good':'warn',pc:r4M.prec>=0.7?'green':'amber'},
+  {lbl:'Macro recall',      val:r4M.rec,r1:Ms[0].rec,col:'neutral',vc:r4M.rec>=0.7?'good':'warn',pc:r4M.rec>=0.7?'green':'amber'},
+  {lbl:'Macro F1',          val:r4M.f1,r1:Ms[0].f1,col:r4M.f1>=0.7?'good':r4M.f1>=0.5?'warn':'bad',vc:r4M.f1>=0.7?'good':r4M.f1>=0.5?'warn':'bad',pc:r4M.f1>=0.7?'green':r4M.f1>=0.5?'amber':'red'},
+];
+const hcEl=document.getElementById('headline-cards');
+hc.forEach(m=>{
+  hcEl.innerHTML+=`<div class="metric-card ${m.col}">
+    <div class="mc-label">${m.lbl}</div>
+    <div class="mc-value ${m.vc}">${pct(m.val)}</div>
+    <div class="mc-delta up">${dl(m.val,m.r1)} from run 1</div>
+    <div class="mc-sub">Run 1: ${pct(m.r1)}</div>
+    <div class="pbar"><div class="pfill ${m.pc}" style="width:${pct(m.val)};"></div></div>
+  </div>`;
 });
+
+// TREND CHART
+new Chart(document.getElementById('trendChart'),{
+  type:'line',
+  data:{labels:['Run 1','Run 2','Run 3','Run 4'],datasets:[
+    {label:'Category accuracy',data:CAs.map(v=>Math.round(v*100)),borderColor:'#6b9fd4',backgroundColor:'rgba(107,159,212,0.08)',pointBackgroundColor:'#6b9fd4',tension:0.3,borderWidth:2,pointRadius:5,fill:true},
+    {label:'Priority accuracy',data:PAs.map(v=>Math.round(v*100)),borderColor:'#6db87a',backgroundColor:'rgba(109,184,122,0.06)',pointBackgroundColor:'#6db87a',tension:0.3,borderWidth:2,pointRadius:5,fill:true},
+    {label:'Macro F1',data:Ms.map(m=>Math.round(m.f1*100)),borderColor:'#d4944a',backgroundColor:'transparent',pointBackgroundColor:'#d4944a',tension:0.3,borderWidth:2,borderDash:[4,3],pointRadius:5},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e1e1e',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#f0ece4',bodyColor:'#7a7670',padding:10}},
+    scales:{
+      x:{ticks:{color:'#5a5650',font:{size:11,family:"'DM Mono'"}},grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{min:0,max:100,ticks:{color:'#5a5650',font:{size:10,family:"'DM Mono'"},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}
+    }
+  }
+});
+
+// PRIO CHART
+new Chart(document.getElementById('prioChart'),{
+  type:'bar',
+  data:{labels:['Ground truth','Run 4'],datasets:[
+    {label:'High',    data:[3,4],backgroundColor:'#c96060'},
+    {label:'Critical',data:[1,0],backgroundColor:'#d4944a'},
+    {label:'Medium',  data:[4,4],backgroundColor:'#6b9fd4'},
+    {label:'Low',     data:[2,2],backgroundColor:'#6db87a'},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e1e1e',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#f0ece4',bodyColor:'#7a7670',padding:10}},
+    scales:{
+      x:{stacked:true,ticks:{color:'#5a5650',font:{size:11}},grid:{display:false}},
+      y:{stacked:true,max:10,ticks:{color:'#5a5650',font:{size:10},stepSize:2},grid:{color:'rgba(255,255,255,0.04)'}}
+    }
+  }
+});
+
+// F1 CHART
+new Chart(document.getElementById('f1Chart'),{
+  type:'bar',
+  data:{labels:trueLabels.map(c=>c.length>14?c.slice(0,13)+'…':c),datasets:[
+    {label:'Run 1',data:trueLabels.map(c=>Math.round(mets(c,predFns[0]).f1*100)),backgroundColor:'#6b9fd4'},
+    {label:'Run 2',data:trueLabels.map(c=>Math.round(mets(c,predFns[1]).f1*100)),backgroundColor:'#d4944a'},
+    {label:'Run 3',data:trueLabels.map(c=>Math.round(mets(c,predFns[2]).f1*100)),backgroundColor:'#9b84d4'},
+    {label:'Run 4',data:trueLabels.map(c=>Math.round(mets(c,predFns[3]).f1*100)),backgroundColor:'#6db87a'},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e1e1e',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#f0ece4',bodyColor:'#7a7670',padding:10}},
+    scales:{
+      x:{ticks:{color:'#5a5650',font:{size:9},maxRotation:35},grid:{display:false}},
+      y:{min:0,max:100,ticks:{color:'#5a5650',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}
+    }
+  }
+});
+
+// PER CLASS TABLE
+const ctbody=document.getElementById('class-tbody');
+trueLabels.forEach(cat=>{
+  const m=mets(cat,predFns[3]);
+  const status=m.f1===1?`<span class="bdg g">perfect</span>`:m.f1>=0.7?`<span class="bdg g">good</span>`:m.f1>=0.4?`<span class="bdg a">needs work</span>`:`<span class="bdg r">failing</span>`;
+  ctbody.innerHTML+=`<tr>
+    <td style="font-weight:500;">${cat}</td>
+    <td class="tc"><span class="bdg g">${m.tp}</span></td>
+    <td class="tc"><span class="bdg a">${m.fp}</span></td>
+    <td class="tc"><span class="bdg r">${m.fn}</span></td>
+    <td class="tc"><span class="bdg b">${m.tn}</span></td>
+    <td class="tc"><span class="bdg ${fc(m.prec)}">${pct(m.prec)}</span></td>
+    <td class="tc"><span class="bdg ${fc(m.rec)}">${pct(m.rec)}</span></td>
+    <td class="tc"><span class="bdg ${fc(m.f1)}">${pct(m.f1)}</span></td>
+    <td>${status}</td>
+  </tr>`;
+});
+
+// CASE TABLE
+const caseBody=document.getElementById('case-tbody');
+cases.forEach(c=>{
+  const oks=[c.r1c,c.r2c,c.r3c,c.r4c].map(p=>c.trueCat===p);
+  const prioOk=c.truePrio.toLowerCase()===c.r4p.toLowerCase();
+  const trend=oks.every(v=>v)?`<span class="bdg g">stable</span>`:oks[3]&&!oks[0]?`<span class="bdg g">fixed</span>`:!oks[3]&&oks[0]?`<span class="bdg r">regressed</span>`:`<span class="bdg a">partial</span>`;
+  const catCell=r=>`<td style="font-size:11px;color:${oks[r]?'var(--text)':'var(--red)'};">${[c.r1c,c.r2c,c.r3c,c.r4c][r]}</td>`;
+  caseBody.innerHTML+=`<tr>
+    <td style="font-size:11px;">${c.subj}</td>
+    <td style="font-size:11px;font-weight:500;">${c.trueCat}</td>
+    ${[0,1,2,3].map(i=>catCell(i)).join('')}
+    <td>${pb(c.truePrio)}</td>
+    <td>${pb(c.r4p)}</td>
+    <td class="tc"><span class="bdg ${prioOk?'g':'r'}">${prioOk?'✓':'✗'}</span></td>
+    <td class="tc">${trend}</td>
+  </tr>`;
+});
+
+// F1 PROGRESSION TABLE
+const f1tbody=document.getElementById('f1-tbody');
+trueLabels.forEach(cat=>{
+  const ms=predFns.map(f=>mets(cat,f));
+  const fd=Math.round((ms[3].f1-ms[0].f1)*100);
+  const fdCell=fd>0?`<span class="bdg g">+${fd}pp</span>`:fd<0?`<span class="bdg r">${fd}pp</span>`:`<span class="bdg gy">—</span>`;
+  const status=ms[3].f1===1?`<span class="bdg g">perfect</span>`:ms[3].f1>=0.7?`<span class="bdg g">good</span>`:ms[3].f1>=0.4?`<span class="bdg a">needs work</span>`:`<span class="bdg r">failing</span>`;
+  f1tbody.innerHTML+=`<tr>
+    <td style="font-weight:500;">${cat}</td>
+    ${ms.map(m=>`<td class="tc"><span class="bdg ${fc(m.f1)}">${pct(m.f1)}</span></td>`).join('')}
+    <td class="tc">${fdCell}</td>
+    <td class="tc"><span class="bdg ${fc(ms[3].prec)}">${pct(ms[3].prec)}</span></td>
+    <td class="tc"><span class="bdg ${fc(ms[3].rec)}">${pct(ms[3].rec)}</span></td>
+    <td>${status}</td>
+  </tr>`;
+});
+
+// CONFUSION MATRIX
+const cfmTable=document.getElementById('cfm-table');
+const predLabels=[...new Set(cases.map(c=>c.r4c))].sort();
+let hdr=`<tr><th style="text-align:left;background:var(--surface2);color:var(--muted);font-size:10px;padding:8px 10px;">Actual \\ Predicted</th>`;
+predLabels.forEach(p=>{hdr+=`<th>${p.length>16?p.slice(0,15)+'…':p}</th>`;});
+hdr+='</tr>';
+cfmTable.innerHTML=hdr;
+trueLabels.forEach(tr2=>{
+  let row=`<tr><td class="row-hdr">${tr2}</td>`;
+  predLabels.forEach(pr=>{
+    const cnt=cases.filter(c=>c.trueCat===tr2&&c.r4c===pr).length;
+    if(cnt>0) row+=`<td class="${tr2===pr?'tp':'fn'}">${cnt}</td>`;
+    else row+=`<td class="tn">0</td>`;
+  });
+  row+='</tr>';
+  cfmTable.innerHTML+=row;
+});
+
+// SCORECARD
+const sc=document.getElementById('scorecard');
+const targets=[
+  {lbl:'Category accuracy',val:r4CatAcc,target:0.75,r1:CAs[0]},
+  {lbl:'Priority accuracy', val:r4PrioAcc,target:0.80,r1:PAs[0]},
+  {lbl:'Macro F1',          val:r4M.f1,target:0.65,r1:Ms[0].f1},
+  {lbl:'Zero recall cats',  val:1-(trueLabels.filter(c=>mets(c,predFns[3]).rec===0).length/trueLabels.length),target:1.0,r1:0.6},
+];
+targets.forEach(t=>{
+  const hit=t.val>=t.target;
+  sc.innerHTML+=`<div class="sc-card">
+    <div class="sc-metric">${t.lbl}</div>
+    <div class="sc-val" style="color:${hit?'var(--green)':'var(--amber);'};">${pct(t.val)}</div>
+    <div class="sc-target">target ${pct(t.target)}</div>
+    <span class="bdg ${hit?'g':'a'}">${hit?'target hit':'in progress'}</span>
+  </div>`;
+});
+
+// TABS
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
 </script>
-
-
-</body></html>
+</body>
+</html>
