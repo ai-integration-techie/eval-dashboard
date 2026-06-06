@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)file:///Users/hirenshah/Downloads/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Email Classifier — Eval Dashboard | Hiren Shah</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00c2ff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1b2e 60%, #0a1628 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,194,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,194,255,0.1);
+    border: 1px solid rgba(0,194,255,0.25);
+    color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    margin-bottom: 0.75rem;
+  }
+  .header-badge::before { content: '●'; font-size: 8px; }
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.2; margin-bottom: 0.4rem;
+  }
+  h1 span { color: var(--accent); }
+  .header-sub {
+    font-size: 13px; color: var(--text2);
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .header-sub a {
+    color: var(--accent); text-decoration: none; font-size: 12px;
+    border-bottom: 1px solid rgba(0,194,255,0.3);
+    transition: border-color 0.2s;
+  }
+  .header-sub a:hover { border-color: var(--accent); }
+  .dot { color: var(--text3); }
+
+  /* LAYOUT */
+  main { padding: 2rem 2.5rem; max-width: 1200px; margin: 0 auto; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 0.75rem;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .kpi::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi.green::after { background: var(--green); }
+  .kpi.blue::after { background: var(--accent); }
+  .kpi.yellow::after { background: var(--yellow); }
+  .kpi.purple::after { background: var(--accent2); }
+  .kpi-label { font-size: 11px; color: var(--text2); margin-bottom: 0.4rem; font-weight: 500; }
+  .kpi-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.blue { color: var(--accent); }
+  .kpi-value.yellow { color: var(--yellow); }
+  .kpi-value.purple { color: var(--accent2); }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 0.4rem; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 1.25rem; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .icon { font-size: 15px; }
+
+  /* RUN COMPARISON TABLE */
+  .run-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .run-table th {
+    text-align: left; font-weight: 600; font-size: 11px;
+    color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0 0.75rem 0.75rem; border-bottom: 1px solid var(--border);
+  }
+  .run-table td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    font-family: 'DM Mono', monospace; font-size: 12px;
+  }
+  .run-table tr:last-child td { border-bottom: none; }
+  .run-table tr.best td { background: rgba(16,185,129,0.05); }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .pill.green { background: rgba(16,185,129,0.15); color: var(--green); }
+  .pill.yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .pill.red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .pill.blue { background: rgba(0,194,255,0.15); color: var(--accent); }
+  .delta { font-size: 11px; color: var(--green); margin-left: 4px; }
+  .delta.neg { color: var(--red); }
+
+  /* CONFUSION MATRIX */
+  .matrix-wrap { overflow-x: auto; }
+  .matrix-table { border-collapse: collapse; font-size: 12px; width: 100%; }
+  .matrix-table th {
+    padding: 6px 8px; font-size: 10px; font-weight: 600;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .matrix-table td {
+    padding: 8px; text-align: center;
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    min-width: 36px;
+  }
+  .matrix-table td.tp { background: rgba(16,185,129,0.25); color: var(--green); font-weight: 700; }
+  .matrix-table td.fp { background: rgba(239,68,68,0.12); color: var(--red); }
+  .matrix-table td.zero { color: var(--text3); }
+  .matrix-table .row-label { text-align: left; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 11px; white-space: nowrap; padding-right: 12px; }
+  .matrix-table .col-label { color: var(--text2); font-size: 10px; white-space: nowrap; }
+  .axis-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* DATA TABLE */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    text-align: left; font-weight: 600; font-size: 10px;
+    color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0 0.75rem 0.6rem; border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(30,45,69,0.4);
+    color: var(--text2); font-size: 12px;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table td.subject { color: var(--text); font-weight: 500; max-width: 180px; }
+  .correct { color: var(--green); }
+  .incorrect { color: var(--red); }
+  .check::before { content: '✓ '; }
+  .cross::before { content: '✗ '; }
+
+  /* PROGRESS BAR */
+  .progress-row { margin-bottom: 0.9rem; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .progress-label span:first-child { font-size: 12px; color: var(--text2); }
+  .progress-label span:last-child { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); font-weight: 600; }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+    font-size: 12px; color: var(--text3);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .hhh-pills { display: flex; gap: 8px; }
+  .hhh-pill {
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    border: 1px solid;
+  }
+  .hhh-pill.h1 { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.08); }
+  .hhh-pill.h2 { border-color: var(--text3); color: var(--text3); background: transparent; }
+  .hhh-pill.h3 { border-color: var(--text3); color: var(--text3); background: transparent; }
+  .hhh-note { font-size: 11px; color: var(--text3); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">The Eval Engineer's Playbook · Article 2</div>
+  <h1>AI Email Classifier <span>Eval Dashboard</span></h1>
+  <div class="header-sub">
+    <span>Hiren Shah · Director, Platform Support @ Cloud Software Group</span>
+    <span class="dot">·</span>
+    <span>10 emails · 4 prompt runs · n8n + Claude + Google Sheets</span>
+    <span class="dot">·</span>
+    <a href="https://www.linkedin.com/pulse/we-set-launch-criteria-traditional-software-features-all-hiren-shah-7dhfc/" target="_blank">Read Article 1 → HHH Framework</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI ROW -->
+  <div class="section-label">Final Run Performance (Run 4)</div>
+  <div class="kpi-grid">
+    <div class="kpi green">
+      <div class="kpi-label">Category Accuracy</div>
+      <div class="kpi-value green">80%</div>
+      <div class="kpi-sub">8 of 10 correct</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Priority Accuracy</div>
+      <div class="kpi-value blue">90%</div>
+      <div class="kpi-sub">9 of 10 correct</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">Prompt Iterations</div>
+      <div class="kpi-value yellow">4</div>
+      <div class="kpi-sub">Baseline → optimised</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Dataset Size</div>
+      <div class="kpi-value purple">10</div>
+      <div class="kpi-sub">Ground truth emails</div>
+    </div>
+  </div>
+
+  <!-- RUN COMPARISON + PER-CLASS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title"><span class="icon">📈</span> Prompt Iteration Results</div>
+      <table class="run-table">
+        <thead>
+          <tr>
+            <th>Run</th>
+            <th>Change</th>
+            <th>Category</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Run 1</td>
+            <td style="color:var(--text2)">Baseline</td>
+            <td><span class="pill red">50%</span></td>
+            <td><span class="pill yellow">60%</span></td>
+          </tr>
+          <tr>
+            <td>Run 2</td>
+            <td style="color:var(--text2)">JSON format</td>
+            <td><span class="pill yellow">60%</span><span class="delta">+10%</span></td>
+            <td><span class="pill yellow">60%</span></td>
+          </tr>
+          <tr>
+            <td>Run 3</td>
+            <td style="color:var(--text2)">+ Definitions</td>
+            <td><span class="pill green">80%</span><span class="delta">+20%</span></td>
+            <td><span class="pill yellow">70%</span><span class="delta">+10%</span></td>
+          </tr>
+          <tr class="best">
+            <td><strong>Run 4</strong></td>
+            <td style="color:var(--text2)">+ Rules</td>
+            <td><span class="pill green">80%</span></td>
+            <td><span class="pill green">90%</span><span class="delta">+20%</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+        <div style="font-size:11px; color:var(--text3);">Total gain across 4 runs</div>
+        <div style="display:flex; gap:1rem; margin-top:6px;">
+          <span style="font-size:13px; color:var(--green); font-weight:600;">Category +30%</span>
+          <span style="font-size:13px; color:var(--accent); font-weight:600;">Priority +30%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🎯</span> Per-Class Accuracy (Run 4)</div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Account Access</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Billing</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Bug Report</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>General Inquiry</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Feature Request</span><span>0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Integration Issue</span><span>0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Performance Issue</span><span>100%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Technical Issue</span><span>50%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%;background:var(--yellow)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFUSION MATRIX -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-title"><span class="icon">🔲</span> Category Confusion Matrix (Run 4 — Final)</div>
+    <div class="matrix-wrap">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="col-label">Acct Access</th>
+            <th class="col-label">Feature Req</th>
+            <th class="col-label">Billing</th>
+            <th class="col-label">Bug Report</th>
+            <th class="col-label">Acct Support</th>
+            <th class="col-label">General Inq</th>
+            <th class="col-label">Tech Issue</th>
+            <th class="col-label">Perf Issue</th>
+            <th class="col-label">Integ Issue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Account Access</td>
+            <td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Feature Request</td>
+            <td class="zero">0</td><td class="fp">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="fp">1</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Billing</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="tp">2</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Bug Report</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Account Support</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">General Inquiry</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Technical Issue</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td><td class="fp">1</td>
+          </tr>
+          <tr>
+            <td class="row-label">Performance Issue</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="tp">1</td><td class="zero">0</td>
+          </tr>
+          <tr>
+            <td class="row-label">Integration Issue</td>
+            <td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="fp">1</td><td class="zero">0</td><td class="fp">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="axis-label" style="margin-top:8px;">Rows = Ground Truth · Columns = Predicted · Green diagonal = correct · Red = misclassified</div>
+    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; gap:2rem; flex-wrap:wrap;">
+      <div>
+        <div style="font-size:11px; color:var(--text3);">Key misclassification</div>
+        <div style="font-size:13px; color:var(--red); margin-top:3px;">Feature Request → "Feature Enhancement Request"</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--text3);">Key misclassification</div>
+        <div style="font-size:13px; color:var(--red); margin-top:3px;">Integration Issue → "Technical Issue"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAW DATA TABLE -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-title"><span class="icon">📋</span> All 10 Emails — Ground Truth vs Run 4 Predictions</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Subject</th>
+            <th>GT Category</th>
+            <th>GT Priority</th>
+            <th>Pred Category</th>
+            <th>Pred Priority</th>
+            <th>Cat ✓</th>
+            <th>Pri ✓</th>
+          </tr>
+        </thead>
+        <tbody id="dataRows"><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">01</td>
+    <td class="subject">Unable to login to my account</td>
+    <td style="font-size:11px">Account Access</td>
+    <td><span class="pill yellow">High</span></td>
+    <td style="font-size:11px;color:var(--green)">Account Access</td>
+    <td><span class="pill yellow">High</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">02</td>
+    <td class="subject">Feature request for dark mode</td>
+    <td style="font-size:11px">Feature Request</td>
+    <td><span class="pill green">Low</span></td>
+    <td style="font-size:11px;color:var(--red)">Feature Enhancement Request</td>
+    <td><span class="pill green">Low</span></td>
+    <td class="incorrect cross">No</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">03</td>
+    <td class="subject">Payment failed during checkout</td>
+    <td style="font-size:11px">Billing</td>
+    <td><span class="pill yellow">High</span></td>
+    <td style="font-size:11px;color:var(--green)">Billing</td>
+    <td><span class="pill yellow">High</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">04</td>
+    <td class="subject">App crashing on startup</td>
+    <td style="font-size:11px">Bug Report</td>
+    <td><span class="pill red">Critical</span></td>
+    <td style="font-size:11px;color:var(--green)">Bug Report</td>
+    <td><span class="pill yellow">High</span></td>
+    <td class="correct check">Yes</td>
+    <td class="incorrect cross">No</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">05</td>
+    <td class="subject">Need help with password reset</td>
+    <td style="font-size:11px">Account Support</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td style="font-size:11px;color:var(--green)">Account Support</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">06</td>
+    <td class="subject">Question about pricing plans</td>
+    <td style="font-size:11px">General Inquiry</td>
+    <td><span class="pill green">Low</span></td>
+    <td style="font-size:11px;color:var(--green)">General Inquiry</td>
+    <td><span class="pill green">Low</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">07</td>
+    <td class="subject">Cannot upload files</td>
+    <td style="font-size:11px">Technical Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td style="font-size:11px;color:var(--green)">Technical Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">08</td>
+    <td class="subject">Refund request</td>
+    <td style="font-size:11px">Billing</td>
+    <td><span class="pill yellow">High</span></td>
+    <td style="font-size:11px;color:var(--green)">Billing</td>
+    <td><span class="pill yellow">High</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">09</td>
+    <td class="subject">Slow performance in dashboard</td>
+    <td style="font-size:11px">Performance Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td style="font-size:11px;color:var(--green)">Performance Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td class="correct check">Yes</td>
+    <td class="correct check">Yes</td>
+  </tr><tr>
+    <td style="color:var(--text3);font-family:&#39;DM Mono&#39;,monospace">10</td>
+    <td class="subject">Integration with Slack not working</td>
+    <td style="font-size:11px">Integration Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td style="font-size:11px;color:var(--red)">Technical Issue</td>
+    <td><span class="pill blue">Medium</span></td>
+    <td class="incorrect cross">No</td>
+    <td class="correct check">Yes</td>
+  </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HHH STATUS -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-title"><span class="icon">🧭</span> HHH Compliance Status</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem;">
+      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--green);">
+        <div style="font-size:12px; font-weight:700; color:var(--green); margin-bottom:6px;">H1 — Helpful ✓ MEASURED</div>
+        <div style="font-size:12px; color:var(--text2);">Category: 80% · Priority: 90%<br>F1 threshold met (≥70%)</div>
+      </div>
+      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--text3);">
+        <div style="font-size:12px; font-weight:700; color:var(--text3); margin-bottom:6px;">H2 — Honest ⏳ PENDING</div>
+        <div style="font-size:12px; color:var(--text3);">Confidence calibration not yet measured.<br>Coming in Article 3.</div>
+      </div>
+      <div style="background:var(--surface2); border-radius:8px; padding:1rem; border-left:3px solid var(--text3);">
+        <div style="font-size:12px; font-weight:700; color:var(--text3); margin-bottom:6px;">H3 — Harmless ⏳ PENDING</div>
+        <div style="font-size:12px; color:var(--text3);">Bias / demographic consistency not yet measured.<br>Coming in Article 3.</div>
+      </div>
+    </div>
+    <div class="hhh-note" style="margin-top:1rem;">80% accuracy on H1 is a good result — but a classifier is not HHH-complete until all three dimensions are scored.</div>
+  </div>
+
+</main>
+
+<footer>
+  <div>
+    Built by <strong style="color:var(--text)">Hiren Shah</strong> · 
+    <a href="https://www.linkedin.com/in/hiren-shah-6365b91" target="_blank">LinkedIn</a> · 
+    <a href="https://github.com/ai-integration-techie" target="_blank">GitHub</a> · 
+    <a href="https://www.linkedin.com/pulse/we-set-launch-criteria-traditional-software-features-all-hiren-shah-7dhfc/" target="_blank">Article 1: HHH Framework →</a>
+  </div>
+  <div class="hhh-pills">
+    <span class="hhh-pill h1">H1 Helpful</span>
+    <span class="hhh-pill h2">H2 Honest</span>
+    <span class="hhh-pill h3">H3 Harmless</span>
+  </div>
+</footer>
+
+<script>
+const data = [
+  { subject: "Unable to login to my account",      gtCat: "Account Access",    gtPri: "High",     predCat: "Account Access",           predPri: "High"     },
+  { subject: "Feature request for dark mode",       gtCat: "Feature Request",   gtPri: "Low",      predCat: "Feature Enhancement Request", predPri: "Low"  },
+  { subject: "Payment failed during checkout",      gtCat: "Billing",           gtPri: "High",     predCat: "Billing",                  predPri: "High"     },
+  { subject: "App crashing on startup",             gtCat: "Bug Report",        gtPri: "Critical", predCat: "Bug Report",               predPri: "High"     },
+  { subject: "Need help with password reset",       gtCat: "Account Support",   gtPri: "Medium",   predCat: "Account Support",          predPri: "Medium"   },
+  { subject: "Question about pricing plans",        gtCat: "General Inquiry",   gtPri: "Low",      predCat: "General Inquiry",          predPri: "Low"      },
+  { subject: "Cannot upload files",                 gtCat: "Technical Issue",   gtPri: "Medium",   predCat: "Technical Issue",          predPri: "Medium"   },
+  { subject: "Refund request",                      gtCat: "Billing",           gtPri: "High",     predCat: "Billing",                  predPri: "High"     },
+  { subject: "Slow performance in dashboard",       gtCat: "Performance Issue", gtPri: "Medium",   predCat: "Performance Issue",        predPri: "Medium"   },
+  { subject: "Integration with Slack not working",  gtCat: "Integration Issue", gtPri: "Medium",   predCat: "Technical Issue",          predPri: "Medium"   },
+];
+
+const tbody = document.getElementById('dataRows');
+data.forEach((r, i) => {
+  const catMatch = r.gtCat === r.predCat;
+  const priMatch = r.gtPri === r.predPri;
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td style="color:var(--text3);font-family:'DM Mono',monospace">${String(i+1).padStart(2,'0')}</td>
+    <td class="subject">${r.subject}</td>
+    <td style="font-size:11px">${r.gtCat}</td>
+    <td><span class="pill ${r.gtPri==='Critical'?'red':r.gtPri==='High'?'yellow':r.gtPri==='Medium'?'blue':'green'}">${r.gtPri}</span></td>
+    <td style="font-size:11px;color:${catMatch?'var(--green)':'var(--red)'}">${r.predCat}</td>
+    <td><span class="pill ${r.predPri==='Critical'?'red':r.predPri==='High'?'yellow':r.predPri==='Medium'?'blue':'green'}">${r.predPri}</span></td>
+    <td class="${catMatch?'correct check':'incorrect cross'}">${catMatch?'Yes':'No'}</td>
+    <td class="${priMatch?'correct check':'incorrect cross'}">${priMatch?'Yes':'No'}</td>
+  `;
+  tbody.appendChild(row);
+});
+</script>
+
+
+</body></html>
